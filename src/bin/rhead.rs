@@ -6,7 +6,7 @@ use std::{io, process};
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "head",
+    name = "rhead",
     about = "Prints the first 10 lines of each FILE to standard output.",
     version
 )]
