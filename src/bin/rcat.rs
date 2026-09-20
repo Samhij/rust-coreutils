@@ -5,7 +5,7 @@ use std::{io, process};
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "cat",
+    name = "rcat",
     about = "Concatenate FILE(s) to standard output.",
     version
 )]

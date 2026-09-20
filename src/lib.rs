@@ -4,9 +4,7 @@ use std::io::{Read, Write};
 
 #[derive(Args, Debug)]
 pub struct GlobalOpts {
-    /// Explain what is being done
-    #[arg(short, long, global = true)]
-    pub verbose: bool,
+    //
 }
 
 /// Generic helper that copies bytes directly from any reader to standard output
