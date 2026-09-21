@@ -1,16 +1,29 @@
-use clap::Args;
-use std::io;
-use std::io::{Read, Write};
+pub mod lib {
+    use clap::Args;
+    use std::io;
+    use std::io::{Read, Write};
 
-#[derive(Args, Debug)]
-pub struct GlobalOpts {
-    //
-}
+    #[derive(Args, Debug)]
+    pub struct GlobalOpts {
+        /// Explain what is being done
+        #[arg(short, long, default_value_t = false)]
+        pub verbose: bool,
+    }
 
-/// Generic helper that copies bytes directly from any reader to standard output
-pub fn read_and_print<R: Read>(mut reader: R) -> io::Result<()> {
-    let mut stdout = io::stdout().lock();
-    io::copy(&mut reader, &mut stdout)?;
-    stdout.flush()?;
-    Ok(())
+    /// Generic helper that copies bytes directly from any reader to standard output
+    pub fn read_and_print<R: Read>(mut reader: R) -> io::Result<()> {
+        let mut stdout = io::stdout().lock();
+        io::copy(&mut reader, &mut stdout)?;
+        stdout.flush()?;
+        Ok(())
+    }
+
+    pub fn print_headers(file_path: &String) {
+        let display_name = if file_path == "-" {
+            "standard input"
+        } else {
+            file_path
+        };
+        println!("==> {} <==", display_name);
+    }
 }

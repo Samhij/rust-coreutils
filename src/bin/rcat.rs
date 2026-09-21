@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::{GlobalOpts, read_and_print};
+use coreutils::lib::{GlobalOpts, read_and_print};
 use std::fs::File;
 use std::{io, process};
 
@@ -30,10 +30,18 @@ fn main() {
 
     for file_path in &files {
         let result = if file_path == "-" {
+            if args.global.verbose {
+                println!("Concatenating from stdin...");
+            }
             read_and_print(io::stdin().lock())
         } else {
             match File::open(file_path) {
-                Ok(file) => read_and_print(file),
+                Ok(file) => {
+                    if args.global.verbose {
+                        println!("Concatenating file: {}", file_path);
+                    };
+                    read_and_print(file)
+                }
                 Err(err) => Err(err),
             }
         };

@@ -3,8 +3,8 @@ use predicates::prelude::*;
 use std::fs;
 use tempfile::TempDir;
 
-fn rhead() -> Command {
-    Command::cargo_bin("rhead").unwrap()
+fn rtail() -> Command {
+    Command::cargo_bin("rtail").unwrap()
 }
 
 fn numbered_lines(count: usize) -> String {
@@ -13,17 +13,24 @@ fn numbered_lines(count: usize) -> String {
         .collect()
 }
 
+fn last_numbered_lines(total: usize, count: usize) -> String {
+    let start = total.saturating_sub(count).saturating_add(1);
+    (start..=total)
+        .map(|n| format!("line {n}\n"))
+        .collect()
+}
+
 #[test]
-fn prints_first_ten_lines_by_default() {
+fn prints_last_ten_lines_by_default() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("lines.txt");
     fs::write(&file, numbered_lines(15)).unwrap();
 
-    rhead()
+    rtail()
         .arg(&file)
         .assert()
         .success()
-        .stdout(numbered_lines(10));
+        .stdout(last_numbered_lines(15, 10));
 }
 
 #[test]
@@ -32,12 +39,12 @@ fn custom_line_count_with_short_flag() {
     let file = dir.path().join("lines.txt");
     fs::write(&file, numbered_lines(10)).unwrap();
 
-    rhead()
+    rtail()
         .args(["-n", "3"])
         .arg(&file)
         .assert()
         .success()
-        .stdout(numbered_lines(3));
+        .stdout(last_numbered_lines(10, 3));
 }
 
 #[test]
@@ -46,12 +53,12 @@ fn custom_line_count_with_long_flag() {
     let file = dir.path().join("lines.txt");
     fs::write(&file, numbered_lines(10)).unwrap();
 
-    rhead()
+    rtail()
         .args(["--lines", "2"])
         .arg(&file)
         .assert()
         .success()
-        .stdout(numbered_lines(2));
+        .stdout(last_numbered_lines(10, 2));
 }
 
 #[test]
@@ -61,7 +68,7 @@ fn file_with_fewer_lines_than_requested() {
     let content = "only one line\n";
     fs::write(&file, content).unwrap();
 
-    rhead()
+    rtail()
         .arg(&file)
         .assert()
         .success()
@@ -82,7 +89,7 @@ fn processes_multiple_files_sequentially() {
         b.display(),
     );
 
-    rhead()
+    rtail()
         .args(["-n", "1", &a.to_string_lossy(), &b.to_string_lossy()])
         .assert()
         .success()
@@ -91,7 +98,7 @@ fn processes_multiple_files_sequentially() {
 
 #[test]
 fn reads_from_stdin_when_no_files_given() {
-    rhead()
+    rtail()
         .write_stdin("stdin line 1\nstdin line 2\n")
         .assert()
         .success()
@@ -100,12 +107,12 @@ fn reads_from_stdin_when_no_files_given() {
 
 #[test]
 fn reads_from_stdin_when_dash_is_given() {
-    rhead()
+    rtail()
         .args(["-n", "1", "-"])
         .write_stdin("first\nsecond\n")
         .assert()
         .success()
-        .stdout("first\n");
+        .stdout("second\n");
 }
 
 #[test]
@@ -114,7 +121,7 @@ fn empty_file_produces_no_output() {
     let file = dir.path().join("empty.txt");
     fs::write(&file, "").unwrap();
 
-    rhead()
+    rtail()
         .arg(&file)
         .assert()
         .success()
@@ -123,27 +130,27 @@ fn empty_file_produces_no_output() {
 
 #[test]
 fn missing_file_exits_with_error() {
-    rhead()
+    rtail()
         .arg("missing.txt")
         .assert()
         .failure()
-        .stderr(predicate::str::contains("head: missing.txt"));
+        .stderr(predicate::str::contains("tail: missing.txt"));
 }
 
 #[test]
 fn help_flag_works() {
-    rhead()
+    rtail()
         .arg("--help")
         .assert()
         .success()
-        .stdout(predicate::str::contains("Prints the first 10 lines"));
+        .stdout(predicate::str::contains("Prints the last 10 lines"));
 }
 
 #[test]
 fn version_flag_works() {
-    rhead()
+    rtail()
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::contains("rhead"));
+        .stdout(predicate::str::contains("rtail"));
 }
