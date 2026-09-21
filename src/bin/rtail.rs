@@ -1,17 +1,18 @@
 use clap::Parser;
 use coreutils::lib::{GlobalOpts, print_headers};
+use std::collections::VecDeque;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::{io, process};
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "rhead",
-    about = "Prints the first 10 lines of each FILE to standard output.",
+    name = "rtail",
+    about = "Prints the last 10 lines of each FILE to standard output.",
     version
 )]
-struct HeadArgs {
-    /// Prints the first NUM lines instead of the first 10
+struct TailArgs {
+    /// Prints the last NUM lines instead of the first 10
     #[arg(short = 'n', long = "lines", default_value_t = 10)]
     lines: usize,
 
@@ -24,7 +25,7 @@ struct HeadArgs {
 }
 
 fn main() {
-    let args = HeadArgs::parse();
+    let args = TailArgs::parse();
     let mut had_error = false;
 
     let files = if args.files.is_empty() {
@@ -42,7 +43,7 @@ fn main() {
             match File::open(file_path) {
                 Ok(file) => Box::new(BufReader::new(file)),
                 Err(err) => {
-                    eprintln!("head: {}: {}", file_path, err);
+                    eprintln!("tail: {}: {}", file_path, err);
                     had_error = true;
                     continue;
                 }
@@ -56,14 +57,32 @@ fn main() {
             print_headers(file_path);
         }
 
-        for line in reader.lines().take(args.lines) {
+        let mut buffer = VecDeque::with_capacity(args.lines);
+        let mut read_failed = false;
+
+        for line in reader.lines() {
             match line {
-                Ok(l) => println!("{}", l),
+                Ok(l) => {
+                    if args.lines > 0 {
+                        if buffer.len() == args.lines {
+                            buffer.pop_front();
+                        }
+                        buffer.push_back(l);
+                    }
+                }
+
                 Err(err) => {
-                    eprintln!("head: {}: Error reading line: {}", file_path, err);
+                    eprintln!("tail: {}: Error reading line: {}", file_path, err);
                     had_error = true;
+                    read_failed = true;
                     break;
                 }
+            }
+        }
+
+        if !read_failed {
+            for line in buffer {
+                println!("{}", line);
             }
         }
     }

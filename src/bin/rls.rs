@@ -1,6 +1,6 @@
 use chrono::{DateTime, Local};
 use clap::Parser;
-use coreutils::GlobalOpts;
+use coreutils::lib::GlobalOpts;
 use std::ffi::OsString;
 use std::fs::DirEntry;
 use std::os::unix::fs::{MetadataExt, PermissionsExt};
@@ -140,11 +140,7 @@ fn print_long_format(entries: &[LongFormatEntry]) {
         .map(|e| e.nlink.to_string().len())
         .max()
         .unwrap_or(1);
-    let user_width = entries
-        .iter()
-        .map(|e| e.user_name.len())
-        .max()
-        .unwrap_or(1);
+    let user_width = entries.iter().map(|e| e.user_name.len()).max().unwrap_or(1);
     let group_width = entries
         .iter()
         .map(|e| e.group_name.len())
