@@ -30,13 +30,13 @@ impl CommandReport for HeadArgs {
 }
 
 fn main() {
-    let args = HeadArgs::parse();
+    let mut args = HeadArgs::parse();
     let mut had_error = false;
 
     let files = if args.files.is_empty() {
         vec!["-".to_string()]
     } else {
-        args.files.clone()
+        std::mem::take(&mut args.files)
     };
 
     let show_headers = files.len() > 1;

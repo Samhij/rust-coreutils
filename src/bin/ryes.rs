@@ -1,6 +1,7 @@
 use clap::Parser;
 use coreutils::{CommandReport, GlobalOpts};
-use std::io::{self, Write};
+use std::io::{self, ErrorKind, Write};
+use std::process;
 
 #[derive(Parser, Debug)]
 #[command(name = "ryes", about = "Be repetitively affirmative", version)]
@@ -29,7 +30,13 @@ fn main() {
 
     let mut stdout = io::stdout().lock();
     loop {
-        writeln!(stdout, "{}", to_print).unwrap();
+        if let Err(err) = writeln!(stdout, "{}", to_print) {
+            if err.kind() == ErrorKind::BrokenPipe {
+                process::exit(0);
+            }
+            args.report_error(None, err);
+            process::exit(1);
+        }
         stdout.flush().unwrap();
     }
 }
