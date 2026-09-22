@@ -1,6 +1,6 @@
 use chrono::{DateTime, Local};
 use clap::Parser;
-use coreutils::lib::{CommandReport, GlobalOpts};
+use coreutils::{CommandReport, GlobalOpts};
 use std::ffi::OsString;
 use std::fs::DirEntry;
 use std::os::unix::fs::{MetadataExt, PermissionsExt};

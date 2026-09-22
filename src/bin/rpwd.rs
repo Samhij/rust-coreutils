@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::CommandReport;
+use coreutils::CommandReport;
 use std::path::PathBuf;
 use std::{env, fs, process};
 

@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::{CommandReport, GlobalOpts};
+use coreutils::{CommandReport, GlobalOpts};
 
 #[derive(Parser, Debug)]
 #[command(
