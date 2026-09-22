@@ -1,4 +1,5 @@
 use clap::Parser;
+use coreutils::lib::CommandReport;
 use std::path::PathBuf;
 use std::{env, fs, process};
 
@@ -14,11 +15,17 @@ struct PwdArgs {
     physical: bool,
 }
 
+impl CommandReport for PwdArgs {
+    fn name(&self) -> &'static str {
+        "rpwd"
+    }
+}
+
 fn main() {
     let args = PwdArgs::parse();
 
     let current_dir = env::current_dir().unwrap_or_else(|err| {
-        eprintln!("rpwd: error getting current directory: {}", err);
+        args.report_error(None, err);
         process::exit(1);
     });
 

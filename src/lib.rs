@@ -1,5 +1,6 @@
 pub mod lib {
     use clap::Args;
+    use std::fmt::Display;
     use std::io;
     use std::io::{Read, Write};
 
@@ -25,5 +26,16 @@ pub mod lib {
             file_path
         };
         println!("==> {} <==", display_name);
+    }
+
+    pub trait CommandReport {
+        fn name(&self) -> &'static str;
+
+        fn report_error(&self, path: Option<&str>, err: impl Display) {
+            match path {
+                Some(p) => eprintln!("{}: {}: {}", self.name(), p, err),
+                None => eprintln!("{}: {}", self.name(), err),
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::{GlobalOpts, print_headers};
+use coreutils::lib::{CommandReport, GlobalOpts, print_headers};
 use std::collections::VecDeque;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -24,6 +24,12 @@ struct TailArgs {
     global: GlobalOpts,
 }
 
+impl CommandReport for TailArgs {
+    fn name(&self) -> &'static str {
+        "rtail"
+    }
+}
+
 fn main() {
     let args = TailArgs::parse();
     let mut had_error = false;
@@ -31,7 +37,7 @@ fn main() {
     let files = if args.files.is_empty() {
         vec!["-".to_string()]
     } else {
-        args.files
+        args.files.clone()
     };
 
     let show_headers = files.len() > 1;
@@ -43,7 +49,7 @@ fn main() {
             match File::open(file_path) {
                 Ok(file) => Box::new(BufReader::new(file)),
                 Err(err) => {
-                    eprintln!("tail: {}: {}", file_path, err);
+                    args.report_error(Some(file_path), err);
                     had_error = true;
                     continue;
                 }
@@ -72,7 +78,7 @@ fn main() {
                 }
 
                 Err(err) => {
-                    eprintln!("tail: {}: Error reading line: {}", file_path, err);
+                    args.report_error(Some(file_path), format!("Error reading line: {}", err));
                     had_error = true;
                     read_failed = true;
                     break;

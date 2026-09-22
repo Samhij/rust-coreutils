@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::{GlobalOpts, read_and_print};
+use coreutils::lib::{CommandReport, GlobalOpts, read_and_print};
 use std::fs::File;
 use std::{io, process};
 
@@ -18,6 +18,12 @@ struct CatArgs {
     global: GlobalOpts,
 }
 
+impl CommandReport for CatArgs {
+    fn name(&self) -> &'static str {
+        "rcat"
+    }
+}
+
 fn main() {
     let args = CatArgs::parse();
     let mut had_error = false;
@@ -25,7 +31,7 @@ fn main() {
     let files = if args.files.is_empty() {
         vec!["-".to_string()]
     } else {
-        args.files
+        args.files.clone()
     };
 
     for file_path in &files {
@@ -47,7 +53,7 @@ fn main() {
         };
 
         if let Err(err) = result {
-            eprintln!("cat: {}: {}", file_path, err);
+            args.report_error(Some(file_path), err);
             had_error = true;
         }
     }
