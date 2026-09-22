@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::CommandReport;
+use coreutils::CommandReport;
 use filetime::{FileTime, set_file_times};
 use std::fs::OpenOptions;
 use std::process;

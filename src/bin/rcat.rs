@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::{CommandReport, GlobalOpts, read_and_print};
+use coreutils::{CommandReport, GlobalOpts, read_and_print};
 use std::fs::File;
 use std::{io, process};
 
