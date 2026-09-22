@@ -1,6 +1,6 @@
 use chrono::{DateTime, Local};
 use clap::Parser;
-use coreutils::lib::GlobalOpts;
+use coreutils::lib::{CommandReport, GlobalOpts};
 use std::ffi::OsString;
 use std::fs::DirEntry;
 use std::os::unix::fs::{MetadataExt, PermissionsExt};
@@ -35,6 +35,13 @@ struct LsArgs {
     #[command(flatten)]
     global: GlobalOpts,
 }
+
+impl CommandReport for LsArgs {
+    fn name(&self) -> &'static str {
+        "rls"
+    }
+}
+
 fn main() {
     let args = LsArgs::parse();
     let mut had_error = false;
@@ -42,14 +49,14 @@ fn main() {
     let paths = if args.paths.is_empty() {
         vec![".".to_string()]
     } else {
-        args.paths
+        args.paths.clone()
     };
 
-    for path in &paths {
-        let dir = match fs::read_dir(path) {
+    for file_path in &paths {
+        let dir = match fs::read_dir(file_path) {
             Ok(f) => f,
             Err(err) => {
-                eprintln!("rls: {}: {}", path, err);
+                args.report_error(Some(file_path), err);
                 had_error = true;
                 continue;
             }

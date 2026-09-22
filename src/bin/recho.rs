@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::GlobalOpts;
+use coreutils::lib::{CommandReport, GlobalOpts};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -17,6 +17,12 @@ struct EchoArgs {
 
     #[command(flatten)]
     global: GlobalOpts,
+}
+
+impl CommandReport for EchoArgs {
+    fn name(&self) -> &'static str {
+        "recho"
+    }
 }
 
 fn main() {

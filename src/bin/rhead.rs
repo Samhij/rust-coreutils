@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::{GlobalOpts, print_headers};
+use coreutils::lib::{CommandReport, GlobalOpts, print_headers};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::{io, process};
@@ -23,6 +23,12 @@ struct HeadArgs {
     global: GlobalOpts,
 }
 
+impl CommandReport for HeadArgs {
+    fn name(&self) -> &'static str {
+        "rhead"
+    }
+}
+
 fn main() {
     let args = HeadArgs::parse();
     let mut had_error = false;
@@ -30,7 +36,7 @@ fn main() {
     let files = if args.files.is_empty() {
         vec!["-".to_string()]
     } else {
-        args.files
+        args.files.clone()
     };
 
     let show_headers = files.len() > 1;
@@ -42,7 +48,7 @@ fn main() {
             match File::open(file_path) {
                 Ok(file) => Box::new(BufReader::new(file)),
                 Err(err) => {
-                    eprintln!("head: {}: {}", file_path, err);
+                    args.report_error(Some(file_path), err);
                     had_error = true;
                     continue;
                 }
@@ -60,7 +66,7 @@ fn main() {
             match line {
                 Ok(l) => println!("{}", l),
                 Err(err) => {
-                    eprintln!("head: {}: Error reading line: {}", file_path, err);
+                    args.report_error(Some(file_path), format!("Error reading line: {}", err));
                     had_error = true;
                     break;
                 }

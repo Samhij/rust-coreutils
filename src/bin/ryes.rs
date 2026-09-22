@@ -1,5 +1,5 @@
 use clap::Parser;
-use coreutils::lib::GlobalOpts;
+use coreutils::lib::{CommandReport, GlobalOpts};
 use std::io::{self, Write};
 
 #[derive(Parser, Debug)]
@@ -10,6 +10,12 @@ struct YesArgs {
 
     #[command(flatten)]
     global: GlobalOpts,
+}
+
+impl CommandReport for YesArgs {
+    fn name(&self) -> &'static str {
+        "ryes"
+    }
 }
 
 fn main() {
