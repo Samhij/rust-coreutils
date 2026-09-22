@@ -25,13 +25,13 @@ impl CommandReport for CatArgs {
 }
 
 fn main() {
-    let args = CatArgs::parse();
+    let mut args = CatArgs::parse();
     let mut had_error = false;
 
     let files = if args.files.is_empty() {
         vec!["-".to_string()]
     } else {
-        args.files.clone()
+        std::mem::take(&mut args.files)
     };
 
     for file_path in &files {

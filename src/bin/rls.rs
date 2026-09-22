@@ -52,22 +52,30 @@ fn main() {
         args.paths.clone()
     };
 
-    for file_path in &paths {
-        let dir = match fs::read_dir(file_path) {
+    for dir_path in &paths {
+        let dir = match fs::read_dir(dir_path) {
             Ok(f) => f,
             Err(err) => {
-                args.report_error(Some(file_path), err);
+                args.report_error(Some(dir_path), err);
                 had_error = true;
                 continue;
             }
         };
+
+        if args.global.verbose {
+            println!("\nListing directory: {}", dir_path);
+        }
 
         let mut long_entries = Vec::new();
 
         for file in dir {
             let entry = match file {
                 Ok(e) => e,
-                Err(_) => continue,
+                Err(err) => {
+                    args.report_error(None, err);
+                    had_error = true;
+                    continue;
+                }
             };
 
             let file_name = entry.file_name();
